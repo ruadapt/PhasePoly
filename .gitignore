@@ -1,0 +1,46 @@
+# Project outputs
+results/
+logs/
+
+# Python / notebooks
+__pycache__/
+*.py[cod]
+*.so
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments & local secrets
+.env
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Editors / AI tools
+.idea/
+.vscode/
+.cursor/
+.claude/
+.codex/
+
+# OS / shell temp files
+.DS_Store
+._*
+Thumbs.db
+*.swp
+*.swo
+*.tmp
+*.temp
