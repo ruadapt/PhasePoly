@@ -1506,7 +1506,7 @@ class Circuit:
     # Transform Hadamard-CX-Hadamard patterns:
     # 1. h[x] cx[y,x] h[x] -> h[y] cx[x,y] h[y]
     # 2. h[x] cx[x,y] h[x] -> h[y] cx[y,x] h[y]
-    # 3. h[x] h[y] cx[y,x] h[x] h[y] -> (cancels to empty)
+    # 3. h[x] h[y] cx[y,x] h[x] h[y] -> cx[x,y]  (CX direction reversed, not empty)
     # Note: This should be used after pull_x_gates since we don't move h gates across x gates
     def transform_cx_h_gates(this):
         def _is_all_h_gates(node:Node, qubit:int):
@@ -1532,13 +1532,16 @@ class Circuit:
                 continue
             control = node.qubits[0]
             target = node.qubits[1]
-            # Case 1: Hadamard gates on both control and target qubits - cancel all 5 gates
+            # Case 1: Hadamard gates on both control and target qubits -
+            # (H x H) CX (H x H) = CX with control/target reversed.
+            # Remove the 4 surrounding H gates and flip the cx (do NOT remove it).
             if _is_all_h_gates(node, target) and _is_all_h_gates(node, control):
                 node.prev(target).remove_from_circuit()
                 node.next(target).remove_from_circuit()
                 node.prev(control).remove_from_circuit()
                 node.next(control).remove_from_circuit()
-                node.remove_from_circuit()
+                #flip original node
+                node.qubits = [target, control]
             # Case 2: Hadamard gates only on target qubit - flip control/target and relocate Hadamard
             elif _is_all_h_gates(node, target):
                 # Remove original gates
