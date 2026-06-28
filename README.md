@@ -130,6 +130,18 @@ print(rec["qcec"]["status"], rec["qcec"]["detail"])
 
 The standalone CLI `python scripts/verify_circuits.py` checks a single pair, a folder, or every `fig*` example in one go. API reference: [docs/verification.md](docs/verification.md).
 
+## 📓 Demonstration notebooks
+
+Run notebooks from the repo root after installing `requirements.txt`:
+
+```shell
+jupyter notebook circuit_optimization_demo.ipynb
+jupyter notebook circuit_verification_demo.ipynb
+```
+
+- [`circuit_optimization_demo.ipynb`](circuit_optimization_demo.ipynb) walks through synthesis methods, rotation merging, block grouping, GE backends, and heap/solution budgets. It writes demo outputs under `results/demo_optimization/` and verifies them.
+- [`circuit_verification_demo.ipynb`](circuit_verification_demo.ipynb) verifies the paper's circuit `docs/fig*_*.qasm` pairs and cached `cached_results/general/*(best).qasm` outputs against `benchmarks/general/`. The cached-results run also logs to `results/verification/cached_results_general_qcec.log`.
+
 ## 📬 Contact
 
 - Eddy Z. Zhang — eddyzhengzhang \[at] gmail.com
