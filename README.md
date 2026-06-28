@@ -91,11 +91,11 @@ Full reference: [docs/methods_summary.md](docs/methods_summary.md).
 
 ```text
 benchmarks/general/                              # smaller circuits (adder_8, barenco_tof_4, ham15-med, …)
-benchmarks/larger_circuits/{adder, hwb, mcx}/    # larger arithmetic / Hamming / multi-controlled-X
+benchmarks/larger_circuits/{adder, hwb, mcx}/    # larger arithmetic / Hamming coding functions / multi-controlled-X
 benchmarks/vqa/{hwea, qaoa, uccsd}/              # variational workloads
 ```
 
-OpenQASM 2.0 inputs covering arithmetic, Toffoli, hamming coding functions, multi-controlled-X, and VQA workloads. For local runs, drop your own `.qasm` files in a folder and pass it via `--input-dir`.
+OpenQASM 2.0 inputs covering arithmetic, Toffoli, Hamming coding functions, multi-controlled-X, and VQA workloads. For local runs, drop your own `.qasm` files in a folder and pass it via `--input-dir`.
 
 ## 🔁 Batch and Slurm
 
