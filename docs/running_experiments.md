@@ -51,7 +51,7 @@ A profiles JSON file defines named profiles (e.g. `g1`, `g3`, `g1_500`, `g7`) an
 
 ## 2. Serial batch driver
 
-`scripts/run_experiment.py` enumerates a folder, runs the chained `ROUNDS` schedule on each circuit. The default schedule encodes the **Incremental Block Merging** strategy: 7 rounds with `group_size ∈ {1, 3, 1, 5, 1, 7, 1}` and `heap_size = ends_checked = 1000` throughout — start single-block, widen the merge window, refine again, etc., reverting any round that regresses.
+`scripts/run_experiment.py` enumerates a folder, runs the chained `ROUNDS` schedule on each circuit. The in-file default is the **Incremental Block Merging** strategy: 5 rounds with `group_size ∈ {1, 3, 1, 5, 1}` and `heap_size = ends_checked = 1000` throughout — start single-block, widen the merge window, refine again, reverting any round that regresses. The paper's best-results schedule (7 rounds, extending to `.../1/7/1` with per-circuit heap sizes) is `benchmarks/scripts/config/super_parameters_7200s.json` — load it via `--profiles-json`.
 
 ```bash
 # In-file defaults (benchmarks/general/, tag=exp_default):

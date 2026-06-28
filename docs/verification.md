@@ -40,11 +40,11 @@ results = verify_folder_pair(
 )
 ```
 
-`DEFAULT_CIRCUIT_KEYS` is the 27-circuit list used in the paper. `keys` does substring matching against filenames in each folder, so `"adder_8"` matches both `adder_8.qasm` and `adder_8(best).qasm`.
+`DEFAULT_CIRCUIT_KEYS` is the 29-circuit list used in the paper. `keys` does substring matching against filenames in each folder, so `"adder_8"` matches both `adder_8.qasm` and `adder_8(best).qasm`.
 
 ## Notebook walkthrough
 
-[`../circuit_verification_demo.ipynb`](../circuit_verification_demo.ipynb) verifies the four paper figures, one named benchmark, and the full folder. Use it as a template.
+[`../circuit_verification_demo.ipynb`](../circuit_verification_demo.ipynb) verifies the four paper figure pairs. Use it as a template.
 
 ## Runtime guidance
 

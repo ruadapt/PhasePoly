@@ -1,0 +1,42 @@
+{
+    "_comment": "Default PhasePoly experiment config: every round uses heap_size=ends_checked=1000. Round count and group_size schedule per section match super_parameters_7200s.json so the two files are drop-in interchangeable.",
+
+    "profiles": {
+      "g1": { "heap_size": 1000, "ends_checked": 1000, "group_size": 1 },
+      "g3": { "heap_size": 1000, "ends_checked": 1000, "group_size": 3 },
+      "g5": { "heap_size": 1000, "ends_checked": 1000, "group_size": 5 }
+    },
+
+    "circuits": {
+      "_section_general": "circuits in benchmarks/general/",
+      "adder_8":           { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "barenco_tof_3":     { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "barenco_tof_4":     { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "barenco_tof_5":     { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "barenco_tof_10":    { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "csla_mux_3":        { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "gf2^4_mult":        { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "gf2^5_mult":        { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "grover_5":          { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "ham15-high":        { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "ham15-med":         { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "ham15-low":         { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "hwb6":              { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "mod5_4":            { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "mod_adder_1024":    { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "mod_mult_55":       { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "mod_red_21":        { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "qaoa_n8_p4":        { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "qaoa_n10_p4":       { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "qcla_adder_10":     { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "qcla_com_7":        { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "qcla_mod_7":        { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "rc_adder_6":        { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "shor_15_7":         { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "tof_3":             { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "tof_4":             { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "tof_5":             { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "tof_10":            { "assign": ["g1", "g3", "g1", "g5", "g1"] },
+      "vbe_adder_3":       { "assign": ["g1", "g3", "g1", "g5", "g1"] }
+    }
+}

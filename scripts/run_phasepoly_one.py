@@ -20,14 +20,14 @@ Examples:
         --rounds-json '[{"method":"row_heap","rotation_merging_mode":"advanced_rotation_merging","heap_size":1000,"ends_checked":1000,"group_size":1}]' \\
         --timeout 600 --hard-timeout 600
 
-    # rounds from super_parameters.json (per-circuit profile assignments):
+    # rounds from a profiles JSON (per-circuit profile assignments):
     python scripts/run_phasepoly_one.py \\
         --circuit-name adder_8 \\
         --input-qasm benchmarks/general/adder_8.qasm \\
         --output-dir results/big_run/adder_8 \\
         --tag big_run \\
         --log-path results/big_run/log.txt \\
-        --profiles-json benchmarks/scripts/config/super_parameters.json \\
+        --profiles-json benchmarks/scripts/config/super_parameters_7200s.json \\
         --timeout 7200 --hard-timeout 9000
 """
 from __future__ import annotations

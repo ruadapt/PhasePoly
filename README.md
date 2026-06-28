@@ -1,6 +1,6 @@
 # PhasePoly: An Optimization Framework for Phase Polynomials in Quantum Circuits
 
-PhasePoly is a quantum-circuit compilation framework for $\{\text{CNOT}, R_z, X, H\}$ — equivalently Clifford+T — circuits. It builds a **cross-block phase-polynomial intermediate representation** and runs a **space-bounded A\* search** (Phase Polynomial Co-Optimization) to jointly minimise the phase-parity and output-parity networks, returning a better-but-equivalent circuit. PhasePoly accepts OpenQASM 2.0 input over the gate set $\{\text{CNOT}, R_z, T/T^\dagger, S/S^\dagger, Z, X, H, \text{SWAP}\}$, returns OpenQASM 2.0 output in the same gate set, and ships with an MQT-QCEC-based equivalence checker so generate results can be formally verified.
+PhasePoly is a compilation framework for $\{\text{CNOT}, R_z, X, H\}$ (covering Clifford+T) circuits. It builds a **cross-block phase-polynomial intermediate representation** and runs a **space-bounded A\* search** (Phase Polynomial Co-Optimization) to jointly minimise the **phase-parity** and **output-parity** networks, returning an equivalent circuit with fewer gates. Input and output are OpenQASM 2.0 over $\{\text{CNOT}, R_z, T/T^\dagger, S/S^\dagger, Z, X, H, \text{SWAP}\}$; a equivalence checker powered by Qiskit and MQT-QCEC is bundled for formal verification.
 
 ![PhasePoly search tree](docs/searchTree.png)
 
@@ -104,7 +104,7 @@ python scripts/run_experiment.py --tag typical_experiment \
 ```shell
 bash scripts/run_phasepoly_pipeline.sh \
     --folders general,larger_circuits/adder,larger_circuits/hwb,larger_circuits/mcx \
-    --hard-timeout 3600 --tag phasepoly_full
+    --hard-timeout 10000 --tag phasepoly_full
 ```
 
 Full flag tables: [docs/running_experiments.md](docs/running_experiments.md) and [docs/slurm.md](docs/slurm.md).

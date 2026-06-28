@@ -19,8 +19,8 @@ Usage examples:
     # Inline a custom rounds schedule:
     python scripts/run_experiment.py --rounds-json '[{"method":"single_block_greedy"}]'
 
-    # Use the legacy super_parameters.json (profiles + per-circuit assign):
-    python scripts/run_experiment.py --profiles-json evaluation/super_parameters.json
+    # Use a profiles JSON (profiles + per-circuit assign):
+    python scripts/run_experiment.py --profiles-json benchmarks/scripts/config/super_parameters_7200s.json
 """
 import argparse
 import dataclasses
@@ -53,8 +53,10 @@ TIMEOUT_SECONDS = 600          # per-circuit total wall-clock budget
 
 # Each entry = one round. Round N+1 reads round N's output (chained).
 # Allowed keys: method, rotation_merging_mode, heap_size, ends_checked, group_size.
-# Default: 7 rounds, heap_size=ends_checked=1000 throughout, alternating
-# group_size 1 / 3 / 1 / 5 / 1 / 7 / 1.
+# Default: 5 rounds, heap_size=ends_checked=1000 throughout, alternating
+# group_size 1 / 3 / 1 / 5 / 1. The paper's best-results schedule (7 rounds,
+# extending to .../1/7/1 with larger heap sizes) lives in
+# benchmarks/scripts/config/super_parameters_7200s.json.
 _BASE = {
     "method": "row_heap",
     "rotation_merging_mode": "advanced_rotation_merging",
@@ -66,9 +68,7 @@ ROUNDS = [
     {**_BASE, "group_size": 3},
     {**_BASE, "group_size": 1},
     {**_BASE, "group_size": 5},
-    {**_BASE, "group_size": 1},
-    {**_BASE, "group_size": 7},
-    {**_BASE, "group_size": 1},
+    {**_BASE, "group_size": 1}
 ]
 
 # ============================================================================
