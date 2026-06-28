@@ -44,7 +44,9 @@ results = verify_folder_pair(
 
 ## Notebook walkthrough
 
-[`../circuit_verification_demo.ipynb`](../circuit_verification_demo.ipynb) verifies the four paper figure pairs. Use it as a template.
+[`../circuit_verification_demo.ipynb`](../circuit_verification_demo.ipynb) verifies the four paper figure pairs and cached results in `cached_results/general/`. Use it as a template for one-pair and folder verification.
+
+[`../circuit_optimization_demo.ipynb`](../circuit_optimization_demo.ipynb) is the companion synthesis notebook. It runs small optimization examples, writes outputs under `results/demo_optimization/`, and verifies those outputs.
 
 ## Runtime guidance
 
@@ -59,4 +61,15 @@ Each `verify_pair` call runs the methods in subprocesses with the timeout — a 
 
 ## CLI wrapper
 
-For shell usage there's `scripts/verify_circuits.py`; it takes the same `--keys`, `--original-folder`, `--compared-folder`, `--methods`, `--timeout`, `--log-path` and prints to stdout.
+For shell usage there's `scripts/verify_circuits.py`; it takes the same `--keys`, `--original-dir`, `--compared-dir`, `--methods`, `--timeout`, `--log` and prints to stdout.
+
+```bash
+python -m scripts.verify_circuits examples --methods qcec --timeout 120
+
+python -m scripts.verify_circuits folder \
+    --original-dir benchmarks/general \
+    --compared-dir cached_results/general \
+    --keys barenco_tof_4,tof_3 \
+    --methods qcec --timeout 120 \
+    --log results/verification/cached_results_general_qcec.log
+```

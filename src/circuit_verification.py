@@ -63,7 +63,7 @@
 #     #   original = reference circuit, compared = optimized PPS output
 #     rec = verify_pair(
 #         "benchmarks/general/barenco_tof_4.qasm",
-#         "main_results/phasepoly_results/pps_best/barenco_tof_4(7).qasm",
+#         "cached_results/general/barenco_tof_4(best).qasm",
 #         timeout=300,
 #     )
 #     print(rec["qcec"]["status"], rec["qcec"]["detail"])
@@ -72,7 +72,7 @@
 #     verify_folder_pair(
 #         keys=DEFAULT_CIRCUIT_KEYS,
 #         original_folder="benchmarks/general",
-#         compared_folder="main_results/phasepoly_results/pps_best",
+#         compared_folder="cached_results/general",
 #         methods=["qcec"], timeout=60,
 #         log_path="results/verification/run.log",
 #     )
@@ -85,10 +85,10 @@
 # ignores Python signals -- a plain `signal.alarm` cannot kill it. Some
 # circuits (e.g. `mod_adder_1024`) will run for hours unless killed.
 #
-# To cap each verification, every call runs in a fresh child process spawned
-# via `multiprocessing` (spawn context). After `timeout` seconds the parent
-# does `terminate -> join(5) -> kill` and reports ("timeout", ...). Default
-# is 300 s (5 min); pass `timeout=N` to override.
+# To cap each verification, every call runs in a fresh child process via
+# `multiprocessing` (preferring fork for notebook compatibility). After
+# `timeout` seconds the parent does `terminate -> join(5) -> kill` and reports
+# ("timeout", ...). Default is 300 s (5 min); pass `timeout=N` to override.
 #
 # ----------------------------------------------------------------------------
 # PAIRING (folder vs folder)
@@ -114,6 +114,7 @@ import os
 import sys
 import time
 from datetime import datetime
+from pathlib import Path
 from typing import Iterable
 
 from qiskit import QuantumCircuit
@@ -282,6 +283,18 @@ class _Tee:
             stream.flush()
 
 
+def _display_path(path: str) -> str:
+    """Return a relative path for display when possible."""
+    resolved = Path(path).expanduser().resolve()
+    try:
+        return str(resolved.relative_to(Path.cwd().resolve()))
+    except Exception:
+        try:
+            return str(Path("~") / resolved.relative_to(Path.home().resolve()))
+        except Exception:
+            return str(path)
+
+
 # ---------------------------------------------------------------------------
 # Folder-by-folder driver
 # ---------------------------------------------------------------------------
@@ -342,8 +355,8 @@ def verify_folder_pair(
 
         start = datetime.now()
         print(f"[verify_folder_pair] start: {start:%Y-%m-%d %H:%M:%S}")
-        print(f"  original_folder: {original_folder}")
-        print(f"  compared_folder: {compared_folder}")
+        print(f"  original_folder: {_display_path(original_folder)}")
+        print(f"  compared_folder: {_display_path(compared_folder)}")
         print(f"  methods: {methods}    timeout: {timeout}s    keys: {len(keys)}")
 
         for key in keys:
@@ -351,15 +364,15 @@ def verify_folder_pair(
             comp = compared_map.get(key)
             print(f"\n=== {key} ===")
             if orig is None:
-                print(f"  [skip] no original file matches key in {original_folder}")
+                print(f"  [skip] no original file matches key in {_display_path(original_folder)}")
                 results.append({"key": key, "skipped": "no_original"})
                 continue
             if comp is None:
-                print(f"  [skip] no compared file matches key in {compared_folder}")
+                print(f"  [skip] no compared file matches key in {_display_path(compared_folder)}")
                 results.append({"key": key, "skipped": "no_compared"})
                 continue
-            print(f"  original: {orig}")
-            print(f"  compared: {comp}")
+            print(f"  original: {_display_path(orig)}")
+            print(f"  compared: {_display_path(comp)}")
             try:
                 n = get_num_qubits(orig)
                 print(f"  qubits:   {n}")
@@ -379,7 +392,7 @@ def verify_folder_pair(
         if log_file is not None:
             sys.stdout, sys.stderr = saved_stdout, saved_stderr
             log_file.close()
-            print(f"[verify_folder_pair] log saved to: {log_path}")
+            print(f"[verify_folder_pair] log saved to: {_display_path(log_path)}")
 
     return results
 

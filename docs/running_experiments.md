@@ -51,9 +51,15 @@ A profiles JSON file defines named profiles (e.g. `g1`, `g3`, `g1_500`, `g7`) an
 
 ## 2. Serial batch driver
 
-`scripts/run_experiment.py` enumerates a folder, runs the chained `ROUNDS` schedule on each circuit. The in-file default is the **Incremental Block Merging** strategy: 5 rounds with `group_size ∈ {1, 3, 1, 5, 1}` and `heap_size = ends_checked = 1000` throughout — start single-block, widen the merge window, refine again, reverting any round that regresses. The paper's best-results schedule (7 rounds, extending to `.../1/7/1` with per-circuit heap sizes) is `benchmarks/scripts/config/super_parameters_7200s.json` — load it via `--profiles-json`.
+`scripts/run_experiment.py` enumerates a folder, runs the chained `ROUNDS` schedule on each circuit. The in-file default is the **Incremental Block Merging** strategy: 5 rounds with `group_size ∈ {1, 3, 1, 5, 1}` and `heap_size = ends_checked = 1000` throughout — start single-block, widen the merge window, refine again. Each successful round feeds the next round; failed rounds keep the last successful output. The paper's best-results schedule (7 rounds, extending to `.../1/7/1` with per-circuit heap sizes) is `benchmarks/scripts/config/super_parameters_7200s.json` — load it via `--profiles-json`.
 
 ```bash
+# Quick local benchmark:
+python scripts/run_experiment.py --tag quickstart \
+    --circuits barenco_tof_4,tof_3 \
+    --timeout 120 \
+    --rounds-json '[{"method":"row_heap","heap_size":1000,"ends_checked":1000,"group_size":1}]'
+
 # In-file defaults (benchmarks/general/, tag=exp_default):
 python scripts/run_experiment.py
 
@@ -77,6 +83,8 @@ Common flags:
 | `--profiles-json PATH` | (uses in-file `ROUNDS`) | per-circuit profile lookup |
 
 The driver runs circuits one at a time in process. For parallelism, use the Slurm path.
+
+For the quick local benchmark, inspect `results/quickstart/phasepoly_best_quickstart/summary.csv` and the `*(best).qasm` files in the same directory.
 
 ---
 

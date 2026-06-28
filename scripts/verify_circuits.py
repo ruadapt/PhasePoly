@@ -4,9 +4,9 @@
 HOW TO USE
 ================================================================================
 
-Always run from the repo root (`ppho_circuit_optimization_isca-ae/`):
+Always run from the repo root (`PhasePoly/`):
 
-    cd ppho_circuit_optimization_isca-ae
+    cd PhasePoly
 
 There are three subcommands: `single`, `folder`, and `examples`.
 
@@ -24,7 +24,7 @@ Example:
 
     python -m scripts.verify_circuits single \\
         --original 'benchmarks/general/barenco_tof_4.qasm' \\
-        --compared 'main_results/phasepoly_results/pps_best/barenco_tof_4(7).qasm'
+        --compared 'cached_results/general/barenco_tof_4(best).qasm'
 
 --------------------------------------------------------------------------------
 2) Verify TWO FOLDERS (every key once)
@@ -53,9 +53,9 @@ File-to-key matching uses the "longest matching key wins" rule, so
 
     python -m scripts.verify_circuits examples [--timeout 300]
 
-This runs both a single-pair example and a folder-vs-folder example, with:
-    original = benchmarks/general/                       (reference circuits)
-    compared = main_results/phasepoly_results/pps_best/  (optimized PPS outputs)
+This runs both a single-pair example and a small folder-vs-folder example, with:
+    original = benchmarks/general/       (reference circuits)
+    compared = cached_results/general/   (cached optimized outputs)
 
 The folder-example log is written to
 `results/verification/verify_circuits_examples_<TS>.log`.
@@ -71,9 +71,10 @@ For each method, the result is `<status> <detail> (<elapsed>s)` where status is:
     timeout  - the worker process was killed after `--timeout` seconds.
     error    - the worker raised an exception; `detail` is its message.
 
-The `--timeout` is enforced via a child process (`multiprocessing` spawn);
-this is the only reliable way to kill `mqt.qcec.verify` (a C++ extension that
-ignores Python signals) on circuits like `mod_adder_1024`.
+The `--timeout` is enforced via a child process (`multiprocessing`, preferring
+fork for notebook compatibility); this is the only reliable way to kill
+`mqt.qcec.verify` (a C++ extension that ignores Python signals) on circuits
+like `mod_adder_1024`.
 """
 
 from __future__ import annotations
@@ -95,6 +96,20 @@ from src.circuit_verification import (  # noqa: E402
     verify_folder_pair,
     verify_pair,
 )
+
+
+EXAMPLE_KEYS = ["barenco_tof_3", "barenco_tof_4", "tof_3"]
+
+
+def _display_path(path: str | Path) -> str:
+    resolved = Path(path).expanduser().resolve()
+    try:
+        return str(resolved.relative_to(Path.cwd().resolve()))
+    except Exception:
+        try:
+            return str(Path("~") / resolved.relative_to(Path.home().resolve()))
+        except Exception:
+            return str(path)
 
 
 def _parse_methods(s: str) -> list[str]:
@@ -122,8 +137,8 @@ def _load_keys_file(path: str) -> list[str]:
 
 
 def _print_single_record(record: dict) -> None:
-    print(f"original: {record['original']}")
-    print(f"compared: {record['compared']}")
+    print(f"original: {_display_path(record['original'])}")
+    print(f"compared: {_display_path(record['compared'])}")
     for method in ALL_METHODS:
         if method in record:
             m = record[method]
@@ -160,46 +175,49 @@ def cmd_folder(args: argparse.Namespace) -> int:
 
 
 def cmd_examples(args: argparse.Namespace) -> int:
-    # Examples verify the optimized PPS results against the reference benchmarks:
-    #   original = benchmarks/general/                       (reference circuits)
-    #   compared = main_results/phasepoly_results/pps_best/  (optimized outputs)
-    bench_dir = REPO_ROOT / "benchmarks" / "general"
-    pps_dir = REPO_ROOT / "main_results" / "phasepoly_results" / "pps_best"
+    old_cwd = Path.cwd()
+    os.chdir(REPO_ROOT)
+    try:
+        # Examples verify cached optimized results against the reference benchmarks.
+        bench_dir = Path("benchmarks/general")
+        cached_dir = Path("cached_results/general")
 
-    print("=" * 72)
-    print("Example 1: single pair (barenco_tof_4: benchmarks/general vs pps_best)")
-    print("=" * 72)
-    # barenco_tof_4 has 7 qubits, so BOTH qiskit (<=8 qubits gate) and qcec exercise.
-    single_orig = bench_dir / "barenco_tof_4.qasm"
-    single_comp = pps_dir / "barenco_tof_4(7).qasm"
-    if not single_orig.is_file() or not single_comp.is_file():
-        print(f"  [skip] missing file(s):\n    {single_orig}\n    {single_comp}")
-    else:
-        record = verify_pair(
-            str(single_orig), str(single_comp),
-            methods=args.methods, timeout=args.timeout,
-        )
-        _print_single_record(record)
+        print("=" * 72)
+        print("Example 1: single pair (barenco_tof_4: benchmarks/general vs cached_results/general)")
+        print("=" * 72)
+        # barenco_tof_4 has 7 qubits, so BOTH qiskit (<=8 qubits gate) and qcec exercise.
+        single_orig = bench_dir / "barenco_tof_4.qasm"
+        single_comp = cached_dir / "barenco_tof_4(best).qasm"
+        if not single_orig.is_file() or not single_comp.is_file():
+            print(f"  [skip] missing file(s):\n    {single_orig}\n    {single_comp}")
+        else:
+            record = verify_pair(
+                str(single_orig), str(single_comp),
+                methods=args.methods, timeout=args.timeout,
+            )
+            _print_single_record(record)
 
-    print()
-    print("=" * 72)
-    print(f"Example 2: folder vs folder  ({bench_dir.name}  vs  {pps_dir.name})")
-    print("=" * 72)
-    if not bench_dir.is_dir() or not pps_dir.is_dir():
-        print(f"  [skip] missing folder(s):\n    {bench_dir}\n    {pps_dir}")
-    else:
-        log_dir = REPO_ROOT / "results" / "verification"
-        log_dir.mkdir(parents=True, exist_ok=True)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_path = log_dir / f"verify_circuits_examples_{timestamp}.log"
-        verify_folder_pair(
-            keys=DEFAULT_CIRCUIT_KEYS,
-            original_folder=str(bench_dir),
-            compared_folder=str(pps_dir),
-            methods=args.methods,
-            timeout=args.timeout,
-            log_path=str(log_path),
-        )
+        print()
+        print("=" * 72)
+        print(f"Example 2: folder subset  ({bench_dir}  vs  {cached_dir})")
+        print("=" * 72)
+        if not bench_dir.is_dir() or not cached_dir.is_dir():
+            print(f"  [skip] missing folder(s):\n    {bench_dir}\n    {cached_dir}")
+        else:
+            log_dir = Path("results/verification")
+            log_dir.mkdir(parents=True, exist_ok=True)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            log_path = log_dir / f"verify_circuits_examples_{timestamp}.log"
+            verify_folder_pair(
+                keys=EXAMPLE_KEYS,
+                original_folder=str(bench_dir),
+                compared_folder=str(cached_dir),
+                methods=args.methods,
+                timeout=args.timeout,
+                log_path=str(log_path),
+            )
+    finally:
+        os.chdir(old_cwd)
     return 0
 
 

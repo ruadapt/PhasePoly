@@ -1,6 +1,6 @@
 # PhasePoly: An Optimization Framework for Phase Polynomials in Quantum Circuits
 
-PhasePoly is a compilation framework for $\{\text{CNOT}, R_z, X, H\}$ (covering Clifford+T) circuits. It builds a **cross-block phase-polynomial intermediate representation** and runs a **space-bounded A\* search** (Phase Polynomial Co-Optimization) to jointly minimise the **phase-parity** and **output-parity** networks, returning an equivalent circuit with fewer gates. Input and output are OpenQASM 2.0 over $\{\text{CNOT}, R_z, T/T^\dagger, S/S^\dagger, Z, X, H, \text{SWAP}\}$; a equivalence checker powered by Qiskit and MQT-QCEC is bundled for formal verification.
+PhasePoly is a compilation framework for $\{\text{CNOT}, R_z, X, H\}$ (covering Clifford+T) circuits. It builds a **cross-block phase-polynomial intermediate representation** and runs a **space-bounded A\* search** (Phase Polynomial Co-Optimization) to jointly minimise the **phase-parity** and **output-parity** networks, returning an equivalent circuit with fewer gates. Input and output are OpenQASM 2.0 over $\{\text{CNOT}, R_z, T/T^\dagger, S/S^\dagger, Z, X, H, \text{SWAP}\}$; an equivalence checker powered by Qiskit and MQT-QCEC is bundled for formal verification.
 
 ![PhasePoly search tree](docs/searchTree.png)
 
@@ -54,11 +54,23 @@ print("CX:", result.input_circuit_info["weighted_cx"], "->",
 ### CLI (one shot)
 
 ```shell
-python -m src.phasepoly benchmarks/general/barenco_tof_4.qasm /tmp/barenco_tof_4_opt.qasm \
-    --method row_heap --heap-size 1000 --ends-checked 1000 --group-size 3
+python -m src.phasepoly \
+    benchmarks/general/barenco_tof_4.qasm \
+    results/quickstart/barenco_tof_4_opt.qasm \
+    --method row_heap --heap-size 1000 --ends-checked 1000 --group-size 3 \
+    --circuit-name barenco_tof_4 --quiet
 ```
 
-`python -m src.phasepoly --help` lists every flag.
+Verify the output:
+
+```shell
+python -m scripts.verify_circuits single \
+    --original benchmarks/general/barenco_tof_4.qasm \
+    --compared results/quickstart/barenco_tof_4_opt.qasm \
+    --methods qcec --timeout 120
+```
+
+Expected result: `qcec: ok EquivalenceCriterion.equivalent`. `python -m src.phasepoly --help` lists every synthesis flag.
 
 ## ⚙️ Methods and knobs
 
@@ -83,7 +95,7 @@ benchmarks/larger_circuits/{adder, hwb, mcx}/    # larger arithmetic / Hamming /
 benchmarks/vqa/{hwea, qaoa, uccsd}/              # variational workloads
 ```
 
-OpenQASM 2.0 inputs covering arithmetic, Toffoli, hamming coding functions, multi-controlled-X, and VQA workloads — drop your own `.qasm` files in any folder and pass it via `--folders`.
+OpenQASM 2.0 inputs covering arithmetic, Toffoli, hamming coding functions, multi-controlled-X, and VQA workloads. For local runs, drop your own `.qasm` files in a folder and pass it via `--input-dir`.
 
 ## 🔁 Batch and Slurm
 
@@ -92,14 +104,19 @@ OpenQASM 2.0 inputs covering arithmetic, Toffoli, hamming coding functions, mult
 [`scripts/run_experiment.py`](scripts/run_experiment.py) enumerates a folder, runs an **Incremental Block Merging** schedule (chained rounds with growing `group_size`) on each circuit, and writes everything under `results/<TAG>/`:
 
 ```shell
+python scripts/run_experiment.py --tag quickstart \
+    --circuits barenco_tof_4,tof_3 \
+    --timeout 120 \
+    --rounds-json '[{"method":"row_heap","heap_size":1000,"ends_checked":1000,"group_size":1}]'
+
 python scripts/run_experiment.py --tag exp_default
-python scripts/run_experiment.py --tag typical_experiment \
-    --circuits barenco_tof_4,adder_8,ham15-med
 ```
+
+Inspect `results/quickstart/phasepoly_best_quickstart/summary.csv` for per-circuit metrics and `*(best).qasm` outputs.
 
 ### Slurm cluster (one sbatch entry point)
 
-[`scripts/run_phasepoly_pipeline.sh`](scripts/run_phasepoly_pipeline.sh) builds a tasklist, derives timeouts, and submits one `--array=1-N%K`. Same script for grayscale sanity checks and full multi-hour runs:
+[`scripts/run_phasepoly_pipeline.sh`](scripts/run_phasepoly_pipeline.sh) builds a tasklist, derives timeouts, and submits one `--array=1-N%K`. Same script for small-scale sanity checks and full multi-hour runs:
 
 ```shell
 bash scripts/run_phasepoly_pipeline.sh \
@@ -128,7 +145,7 @@ print(rec["qcec"]["status"], rec["qcec"]["detail"])
 # -> ok EquivalenceCriterion.equivalent
 ```
 
-The standalone CLI `python scripts/verify_circuits.py` checks a single pair, a folder, or every `fig*` example in one go. API reference: [docs/verification.md](docs/verification.md).
+The standalone CLI `python scripts/verify_circuits.py` checks a single pair, a folder, or the cached-results examples in one go. API reference: [docs/verification.md](docs/verification.md).
 
 ## 📓 Demonstration notebooks
 
