@@ -4,7 +4,9 @@ PhasePoly is a compilation framework for $\{\text{CNOT}, R_z, X, H\}$ (covering 
 
 ![PhasePoly search tree](docs/searchTree.png)
 
-<!-- ## 🔥 News -->
+## 🔥 News
+
+- [2025-06-28] PhasePoly v1.0.0 released.
 
 ## 🚀 Installation
 
